@@ -1,0 +1,31 @@
+{
+  "name": "enhanced-outline-plugin-pluck",
+  "version": "1.0.0",
+  "description": "A flexible and dynamic UI configuration plugin using Ant Design for pluck-based UI building.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haidv1992/enhanced-outline-plugin-pluck.git"
+  },
+  "author": "haidv",
+  "license": "MIT",
+  "dependencies": {
+    "@measured/puck": "0.16.2-canary.18657a4",
+    "react": "^18.0.0",
+    "typescript": "^5.4.2",
+    "antd": "^5.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.2",
+    "@types/react": "^18.0.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  }
+}

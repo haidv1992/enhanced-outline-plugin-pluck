@@ -1,0 +1,15 @@
+# Loại trừ các tệp và thư mục không cần thiết
+node_modules
+src
+test
+dist
+coverage
+*.log
+*.lock
+.eslintrc.json
+.prettierrc
+.vscode
+.env
+*.tsbuildinfo
+__tests__
+.idea
