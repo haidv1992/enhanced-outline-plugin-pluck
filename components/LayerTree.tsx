@@ -75,7 +75,7 @@ const LayerTree: React.FC = () => {
                     },
                 },
             });
-            message.success("Deleted item!");
+            // message.success("Deleted item!");
         } else {
             const updatedContent = appState.data.content.filter(
                 (item: any) => item.props.id !== itemId

@@ -95,7 +95,7 @@ var LayerTree = function () {
                 type: "setData",
                 data: __assign(__assign({}, appState.data), { zones: __assign(__assign({}, appState.data.zones), (_a = {}, _a[zoneKey] = updatedZoneContent, _a)) }),
             });
-            antd_1.message.success("Deleted item!");
+            // message.success("Deleted item!");
         }
         else {
             var updatedContent = appState.data.content.filter(function (item) { return item.props.id !== itemId; });
