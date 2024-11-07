@@ -122,6 +122,7 @@ var LayerTree = function () {
         setTitleInput(currentTitle);
     };
     var handleSave = function (itemId, zoneKey) {
+        // @ts-ignore
         var _a;
         var isZone = zoneKey && appState.data.zones[zoneKey];
         var updatedData = isZone
@@ -138,6 +139,7 @@ var LayerTree = function () {
         });
         setEditingKey(null);
     };
+    // @ts-ignore
     var renderTreeNodes = function (items, zoneKey) {
         if (zoneKey === void 0) { zoneKey = "root"; }
         return items.map(function (item, index) {
@@ -148,7 +150,9 @@ var LayerTree = function () {
                     return zone.startsWith("".concat(itemId, ":"));
                 })
                 : [];
+            // @ts-ignore
             var childrenNodes = childZoneKeys.map(function (childZoneKey, index) {
+                // @ts-ignore
                 var zoneItems = appState.data.zones[childZoneKey] || [];
                 return {
                     title: (react_1.default.createElement("div", { className: styles_module_css_1.default.layerTreeItem },
