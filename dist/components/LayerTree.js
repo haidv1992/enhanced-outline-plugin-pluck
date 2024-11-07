@@ -58,12 +58,9 @@ var styles_module_css_1 = __importDefault(require("../styles/styles.module.css")
 var LayerTree = function () {
     var _a = (0, puck_1.usePuck)(), dispatch = _a.dispatch, appState = _a.appState;
     var _b = (0, useClipboard_1.useClipboard)(), clipboard = _b.clipboard, setClipboard = _b.setClipboard;
-    var _c = (0, react_1.useState)([]), expandedKeys = _c[0], setExpandedKeys = _c[1];
-    var _d = (0, react_1.useState)(null), editingKey = _d[0], setEditingKey = _d[1];
-    var _e = (0, react_1.useState)(""), titleInput = _e[0], setTitleInput = _e[1];
-    var onExpand = function (keys) {
-        setExpandedKeys(keys);
-    };
+    // const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+    var _c = (0, react_1.useState)(null), editingKey = _c[0], setEditingKey = _c[1];
+    var _d = (0, react_1.useState)(""), titleInput = _d[0], setTitleInput = _d[1];
     var handleCopy = function (item) {
         setClipboard(item);
         localStorage.setItem("clipboard", JSON.stringify(item));
@@ -91,17 +88,25 @@ var LayerTree = function () {
         antd_1.message.success("Pasted item!");
     };
     var handleDelete = function (itemId, zoneKey) {
-        // @ts-ignore
         var _a;
-        var updatedZoneContent = appState.data.zones[zoneKey].filter(function (item) { return item.props.id !== itemId; });
-        dispatch({
-            type: "setData",
-            data: __assign(__assign({}, appState.data), { zones: __assign(__assign({}, appState.data.zones), (_a = {}, _a[zoneKey] = updatedZoneContent, _a)) }),
-        });
-        antd_1.message.success("Deleted item!");
+        if (appState.data.zones && appState.data.zones[zoneKey]) {
+            var updatedZoneContent = appState.data.zones[zoneKey].filter(function (item) { return item.props.id !== itemId; });
+            dispatch({
+                type: "setData",
+                data: __assign(__assign({}, appState.data), { zones: __assign(__assign({}, appState.data.zones), (_a = {}, _a[zoneKey] = updatedZoneContent, _a)) }),
+            });
+            antd_1.message.success("Deleted item!");
+        }
+        else {
+            var updatedContent = appState.data.content.filter(function (item) { return item.props.id !== itemId; });
+            dispatch({
+                type: "setData",
+                data: __assign(__assign({}, appState.data), { content: updatedContent }),
+            });
+            antd_1.message.success("Deleted item!");
+        }
     };
     var handleSelect = function (index, zoneKey) {
-        console.log(index, zoneKey);
         dispatch({
             type: "setUi",
             ui: {
@@ -117,7 +122,6 @@ var LayerTree = function () {
         setTitleInput(currentTitle);
     };
     var handleSave = function (itemId, zoneKey) {
-        // @ts-ignore
         var _a;
         var isZone = zoneKey && appState.data.zones[zoneKey];
         var updatedData = isZone
@@ -133,22 +137,19 @@ var LayerTree = function () {
             data: updatedData,
         });
         setEditingKey(null);
-        antd_1.message.success("Title updated!");
     };
-    // @ts-ignore
     var renderTreeNodes = function (items, zoneKey) {
         if (zoneKey === void 0) { zoneKey = "root"; }
         return items.map(function (item, index) {
             var itemId = item.props.id;
             var itemTitle = item.props.outline_title || item.type;
-            // @ts-ignore
-            var childZoneKeys = Object.keys(appState.data.zones).filter(function (zone) {
-                return zone.startsWith("".concat(itemId, ":"));
-            });
-            // @ts-ignore
+            var childZoneKeys = appState.data.zones
+                ? Object.keys(appState.data.zones).filter(function (zone) {
+                    return zone.startsWith("".concat(itemId, ":"));
+                })
+                : [];
             var childrenNodes = childZoneKeys.map(function (childZoneKey, index) {
-                // @ts-ignore
-                var zoneItems = appState.data.zones[childZoneKey];
+                var zoneItems = appState.data.zones[childZoneKey] || [];
                 return {
                     title: (react_1.default.createElement("div", { className: styles_module_css_1.default.layerTreeItem },
                         react_1.default.createElement("span", null, "Zone: ".concat(index)),
@@ -160,16 +161,13 @@ var LayerTree = function () {
             return {
                 title: (react_1.default.createElement("div", { className: styles_module_css_1.default.layerTreeItem, onClick: function () { return handleSelect(index, zoneKey); }, onDoubleClick: function () { return handleEdit(itemId, itemTitle); } },
                     editingKey === itemId ? (react_1.default.createElement(antd_1.Input, { value: titleInput, onChange: function (e) { return setTitleInput(e.target.value); }, onPressEnter: function () { return handleSave(itemId, zoneKey); }, onBlur: function () { return handleSave(itemId, zoneKey); }, autoFocus: true })) : (react_1.default.createElement("span", null, itemTitle)),
-                    react_1.default.createElement(ActionbarButtons_1.default, __assign({ onCopy: function () { return handleCopy(item); } }, (childZoneKeys.length <= 1) ? { onPaste: function () { return handlePaste(zoneKey); } } : {}, { onDelete: function () { return handleDelete(itemId, zoneKey); }, disablePaste: !clipboard && !localStorage.getItem("clipboard") })))),
+                    react_1.default.createElement(ActionbarButtons_1.default, __assign({ onCopy: function () { return handleCopy(item); }, onDelete: function () { return handleDelete(itemId, zoneKey); } }, (childZoneKeys.length <= 1 ? { onPaste: function () { return handlePaste(zoneKey); } } : {}), { disablePaste: !clipboard && !localStorage.getItem("clipboard") })))),
                 key: itemId,
                 children: childrenNodes,
             };
         });
     };
     var treeData = renderTreeNodes(appState.data.content);
-    return (react_1.default.createElement(antd_1.Tree, { className: styles_module_css_1.default.layerTree, 
-        // expandedKeys={expandedKeys}
-        // onExpand={onExpand}
-        switcherIcon: react_1.default.createElement(icons_1.DownOutlined, null), treeData: treeData, showLine: true, draggable: true, height: 200, defaultExpandAll: true }));
+    return (react_1.default.createElement(antd_1.Tree, { className: styles_module_css_1.default.layerTree, switcherIcon: react_1.default.createElement(icons_1.DownOutlined, null), treeData: treeData, showLine: true, draggable: true, height: 200, defaultExpandAll: true }));
 };
 exports.default = LayerTree;

@@ -11,13 +11,9 @@ import styles from "../styles/styles.module.css";
 const LayerTree: React.FC = () => {
     const { dispatch, appState } = usePuck();
     const { clipboard, setClipboard } = useClipboard();
-    const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+    // const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
     const [editingKey, setEditingKey] = useState<string | null>(null);
     const [titleInput, setTitleInput] = useState<string>("");
-
-    const onExpand = (keys: string[]) => {
-        setExpandedKeys(keys);
-    };
 
     const handleCopy = (item: any) => {
         setClipboard(item);
@@ -50,7 +46,6 @@ const LayerTree: React.FC = () => {
 
         const updatedZones = {
             ...appState.data.zones,
-            // @ts-ignore
             [zoneKey]: [...(appState.data.zones[zoneKey] || []), newItem],
         };
 
@@ -65,26 +60,39 @@ const LayerTree: React.FC = () => {
     };
 
     const handleDelete = (itemId: string, zoneKey: string) => {
-        // @ts-ignore
+        if (appState.data.zones && appState.data.zones[zoneKey]) {
+            const updatedZoneContent = appState.data.zones[zoneKey].filter(
+                (item: any) => item.props.id !== itemId
+            );
 
-        const updatedZoneContent = appState.data.zones[zoneKey].filter(
-            (item: any) => item.props.id !== itemId
-        );
-        dispatch({
-            type: "setData",
-            data: {
-                ...appState.data,
-                zones: {
-                    ...appState.data.zones,
-                    [zoneKey]: updatedZoneContent,
+            dispatch({
+                type: "setData",
+                data: {
+                    ...appState.data,
+                    zones: {
+                        ...appState.data.zones,
+                        [zoneKey]: updatedZoneContent,
+                    },
                 },
-            },
-        });
-        message.success("Deleted item!");
+            });
+            message.success("Deleted item!");
+        } else {
+            const updatedContent = appState.data.content.filter(
+                (item: any) => item.props.id !== itemId
+            );
+
+            dispatch({
+                type: "setData",
+                data: {
+                    ...appState.data,
+                    content: updatedContent,
+                },
+            });
+            message.success("Deleted item!");
+        }
     };
 
     const handleSelect = (index: number, zoneKey: string) => {
-        console.log(index,zoneKey)
         dispatch({
             type: "setUi",
             ui: {
@@ -102,16 +110,12 @@ const LayerTree: React.FC = () => {
     };
 
     const handleSave = (itemId: string, zoneKey: string) => {
-        // @ts-ignore
-
         const isZone = zoneKey && appState.data.zones[zoneKey];
         const updatedData = isZone
             ? {
                 ...appState.data,
                 zones: {
                     ...appState.data.zones,
-                    // @ts-ignore
-
                     [zoneKey]: appState.data.zones[zoneKey].map((item: any) =>
                         item.props.id === itemId
                             ? {
@@ -137,25 +141,20 @@ const LayerTree: React.FC = () => {
         });
 
         setEditingKey(null);
-        message.success("Title updated!");
     };
-    // @ts-ignore
 
     const renderTreeNodes = (items: any[], zoneKey: string = "root") =>
-        items.map((item: any,index) => {
+        items.map((item: any, index) => {
             const itemId = item.props.id;
             const itemTitle = item.props.outline_title || item.type;
-            // @ts-ignore
-            
-            const childZoneKeys = Object.keys(appState.data.zones).filter((zone) =>
-                zone.startsWith(`${itemId}:`)
-            );
-            // @ts-ignore
+            const childZoneKeys = appState.data.zones
+                ? Object.keys(appState.data.zones).filter((zone) =>
+                    zone.startsWith(`${itemId}:`)
+                )
+                : [];
 
             const childrenNodes = childZoneKeys.map((childZoneKey, index) => {
-                // @ts-ignore
-
-                const zoneItems = appState.data.zones[childZoneKey];
+                const zoneItems = appState.data.zones[childZoneKey] || [];
                 return {
                     title: (
                         <div className={styles.layerTreeItem}>
@@ -191,8 +190,8 @@ const LayerTree: React.FC = () => {
                         )}
                         <ActionbarButtons
                             onCopy={() => handleCopy(item)}
-                            {...(childZoneKeys.length <= 1) ? {onPaste:() => handlePaste(zoneKey)} :{}}
                             onDelete={() => handleDelete(itemId, zoneKey)}
+                            {...(childZoneKeys.length <= 1 ? { onPaste: () => handlePaste(zoneKey) } : {})}
                             disablePaste={!clipboard && !localStorage.getItem("clipboard")}
                         />
                     </div>
@@ -207,8 +206,6 @@ const LayerTree: React.FC = () => {
     return (
         <Tree
             className={styles.layerTree}
-            // expandedKeys={expandedKeys}
-            // onExpand={onExpand}
             switcherIcon={<DownOutlined />}
             treeData={treeData}
             showLine
